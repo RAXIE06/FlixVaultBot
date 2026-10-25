@@ -722,3 +722,79 @@ async def send_cmd(client, message):
     rows.append([InlineKeyboardButton("Custom channel (enter id)", callback_data=f"send_custom|{uid}")])
     await message.reply_text("Choose channel to send to:", reply_markup=InlineKeyboardMarkup(rows))
     return
+
+# --- 1. ADMIN FILE UPLOAD HANDLER (Auto Code Generator) ---
+@Client.on_message(filters.private & (filters.document | filters.video | filters.audio | filters.photo))
+async def handle_admin_file_upload(client, message):
+    uid = message.from_user.id
+    if not is_admin(uid):
+        return  # Agar user admin nahi hai toh yeh handler kuch nahi karega
+    
+    # Media file extract karein
+    media = message.document or message.video or message.audio or (message.photo[-1] if message.photo else None)
+    if not media:
+        return
+    
+    file_id = media.file_id
+    file_name = getattr(media, "file_name", "FlixVault_Movie_File")
+    
+    # Database mein save karke automatic bot_code generate karein
+    bot_code = await db.save_file_with_auto_code(file_id, file_name)
+    
+    await message.reply_text(
+        f"<b>✅ File Saved Successfully!</b>\n\n"
+        f"📁 <b>File Name:</b> {file_name}\n"
+        f"🔑 <b>Bot Code:</b> <code>{bot_code}</code>\n\n"
+        f"<i>Is code ko copy karein aur apni FlixVault website ke admin panel mein movie add karte waqt paste kar dein!</i>"
+    )
+
+
+# --- 2. TOKEN START HANDLER (Website Purchase Delivery) ---
+@Client.on_message(filters.private & filters.command("start"))
+async def start_cmd(client, message):
+    text = message.text
+    args = text.split(" ")
+    
+    # Check karein ki kya start command ke sath token aaya hai (jaise /start TOKEN_XYZ)
+    if len(args) > 1:
+        token = args[1].strip()
+        user_id = message.from_user.id
+        
+        # Database mein token verify aur consume karein (No time expiry, single-use)
+        result = await db.verify_and_consume_token(token, user_id)
+        
+        if not result.get("success"):
+            await message.reply_text(result.get("error", "❌ Invalid or expired link."))
+            return
+        
+        bot_code = result.get("bot_code")
+        
+        # bot_code ke zariye database se file find karein
+        file_doc = await db.get_file_by_code(bot_code)
+        
+        if not file_doc:
+            await message.reply_text("❌ Movie file database mein nahi mili. Kripya admin se sampark karein.")
+            return
+        
+        file_id = file_doc.get("file_id")
+        file_name = file_doc.get("file_name", "Movie")
+        
+        await message.reply_text(f"✅ Payment Verified! Aapki movie send ki ja rahi hai: <b>{file_name}</b>...")
+        
+        try:
+            # User ke personal DM mein file deliver karein
+            await client.send_cached_media(chat_id=user_id, file_id=file_id)
+        except Exception as e:
+            try:
+                # Fallback agar cached media fail ho jaye
+                await client.send_document(chat_id=user_id, document=file_id)
+            except Exception as err:
+                await message.reply_text(f"❌ File send karne mein error aayi: {err}")
+        return
+
+    # Normal Start Command Behavior (Agar bina token ke aaye)
+    mention = message.from_user.mention if message.from_user else "user"
+    try:
+        await message.reply_photo(photo=START_PIC, caption=START_MSG.format(mention=mention), reply_markup=build_start_kb())
+    except Exception:
+        await message.reply_text(START_MSG.format(mention=mention), reply_markup=build_start_kb())
