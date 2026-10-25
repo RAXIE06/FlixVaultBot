@@ -1,21 +1,22 @@
-#https://codeload.github.com/KurimuzonAkuma/pyrogram/zip/refs/heads/dev
+# --- Core Telegram & Fork ------------ #
 pyrofork==2.3.61
-#pyrogram
 TgCrypto
 pyromod==1.5
+
+# --- Scheduling & Tasks -------------- #
 schedule
-APscheduler
-# --- For-Database ------------ #
+APScheduler
+
+# --- Database ------------------------ #
 pymongo
 motor
 dnspython
-# --- For-Web-Response ------- #
+
+# --- Web Server & API Response ------- #
 aiohttp
 python-dotenv
-# --- For-Web-Response ------- #
 pytz
 requests
 bs4
-shortzy
 aiofiles
 asyncio
