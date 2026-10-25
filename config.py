@@ -9,12 +9,12 @@ from logging.handlers import RotatingFileHandler
 
 # Bot token & API credentials from @Botfather & my.telegram.org
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "7401282886:AAG94yMHtPReZLezklQiwD3c6TGQ3yDtT7g")
-APP_ID = int(os.environ.get("APP_ID", "22469064"))
-API_HASH = os.environ.get("API_HASH", "c05481978a217fdb11fa6774b15cba32")
+APP_ID = int(os.environ.get("APP_ID", "21014933"))
+API_HASH = os.environ.get("API_HASH", "c6576c45c80fd11776378fd931bed8e9")
 # --------------------------------------------
 
-OWNER = os.environ.get("OWNER", "sewxiy") # Owner username without @
-OWNER_ID = int(os.environ.get("OWNER_ID", "7328629001")) # Owner id
+OWNER = os.environ.get("OWNER", "Premium_MembershipXBot") # Owner username without @
+OWNER_ID = int(os.environ.get("OWNER_ID", "6045160821")) # Owner id
 PORT = os.environ.get("PORT", "8031")
 # --------------------------------------------
 
