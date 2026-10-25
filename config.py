@@ -19,7 +19,7 @@ PORT = os.environ.get("PORT", "8031")
 # --------------------------------------------
 
 # MongoDB Database Connection (Shared with FlixVault Website)
-DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://rohitplayer87089:rohit870@cluster0.4wt927p.mongodb.net/?retryWrites=true&w=majority")
+DB_URI = os.environ.get("DATABASE_URL", "mongodb+srv://CORNROX:CORNROX@cluster0.gi1rv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DATABASE_NAME", "Cluooo")
 # --------------------------------------------
 
