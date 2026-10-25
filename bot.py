@@ -1,4 +1,3 @@
-
 # Don't Remove Credit @CodeFlix_Bots, @rohit_1888
 # Ask Doubt on telegram @CodeflixSupport
 #
@@ -20,9 +19,9 @@ from pyrogram.enums import ParseMode
 import sys
 import pytz
 from datetime import datetime
-#rohit_1888 on Tg
+
+# FlixVault & Bot Configs
 from config import *
-from database.db_premium import *
 from database.database import *
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import logging
@@ -31,32 +30,14 @@ import logging
 logging.getLogger("apscheduler").setLevel(logging.WARNING)
 
 scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
-scheduler.add_job(remove_expired_users, "interval", seconds=10)
 
-# Reset verify count for all users daily at 00:00 IST
-async def daily_reset_task():
-    try:
-        await db.reset_all_verify_counts()
-    except Exception:
-        pass  
-
-scheduler.add_job(daily_reset_task, "cron", hour=0, minute=0)
-#scheduler.start()
-
-
-name ="""
- BY CODEFLIX BOTS
-"""
-
-def get_indian_time():
-    """Returns the current time in IST."""
-    ist = pytz.timezone("Asia/Kolkata")
-    return datetime.now(ist)
+# If you have background cleanup tasks, you can keep or adjust them here
+# scheduler.add_job(remove_expired_users, "interval", seconds=10)
 
 class Bot(Client):
     def __init__(self):
         super().__init__(
-            name="Bot",
+            name="FlixVaultBot",
             api_hash=API_HASH,
             api_id=APP_ID,
             plugins={
@@ -73,42 +54,37 @@ class Bot(Client):
         usr_bot_me = await self.get_me()
         self.uptime = datetime.now()
 
+        # Optional: Database Channel Check (Agar aapko DB channel ki zaroorat hai)
         try:
-            db_channel = await self.get_chat(CHANNEL_ID)
-            self.db_channel = db_channel
-            test = await self.send_message(chat_id = db_channel.id, text = "Test Message")
-            await test.delete()
+            if "CHANNEL_ID" in globals() or hasattr(sys.modules['config'], 'CHANNEL_ID'):
+                from config import CHANNEL_ID
+                if CHANNEL_ID:
+                    db_channel = await self.get_chat(CHANNEL_ID)
+                    self.db_channel = db_channel
+                    test = await self.send_message(chat_id=db_channel.id, text="Test Message")
+                    await test.delete()
         except Exception as e:
             self.LOGGER(__name__).warning(e)
-            self.LOGGER(__name__).warning(f"Make Sure bot is Admin in DB Channel, and Double check the CHANNEL_ID Value, Current Value {CHANNEL_ID}")
-            self.LOGGER(__name__).info("\nBot Stopped. Join https://t.me/weebs_support for support")
-            sys.exit()
-
-        self.set_parse_mode(ParseMode.HTML)
-        self.LOGGER(__name__).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/weebs_support")
-        self.LOGGER(__name__).info(f"""       
-
-
-  ___ ___  ___  ___ ___ _    _____  _____  ___ _____ ___ 
- / __/ _ \|   \| __| __| |  |_ _\ \/ / _ )/ _ \_   _/ __|
-| (_| (_) | |) | _|| _|| |__ | | >  <| _ \ (_) || | \__ \
- \___\___/|___/|___|_| |____|___/_/\_\___/\___/ |_| |___/
-                                                         
- 
-                                          """)
+            self.LOGGER(__name__).warning("Make sure bot is admin in DB channel if CHANNEL_ID is configured.")
 
         self.set_parse_mode(ParseMode.HTML)
         self.username = usr_bot_me.username
-        self.LOGGER(__name__).info(f"Bot Running..! Made by @Codeflix_Bots")   
+        self.LOGGER(__name__).info("Bot Running..!")
 
-        # Start Web Server
-        app = web.AppRunner(await web_server())
-        await app.setup()
-        await web.TCPSite(app, "0.0.0.0", PORT).start()
+        # Start Web Server (For Render / Koyeb / VPS health checks or web app hooks)
+        try:
+            app = web.AppRunner(await web_server())
+            await app.setup()
+            await web.TCPSite(app, "0.0.0.0", int(PORT)).start()
+            self.LOGGER(__name__).info(f"Web server started on port {PORT}")
+        except Exception as e:
+            self.LOGGER(__name__).warning(f"Web server failed to start: {e}")
 
-
-        try: await self.send_message(OWNER_ID, text = f"<b><blockquote> Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ by @Codeflix_Bots</blockquote></b>")
-        except: pass
+        # Notify Owner on Restart
+        try:
+            await self.send_message(OWNER_ID, text="<b><blockquote>FlixVault Bot Restarted Successfully! 🚀</blockquote></b>")
+        except Exception:
+            pass
 
     async def stop(self, *args):
         await super().stop()
@@ -125,12 +101,3 @@ class Bot(Client):
             self.LOGGER(__name__).info("Shutting down...")
         finally:
             loop.run_until_complete(self.stop())
-
-#
-# Copyright (C) 2025 by Codeflix-Bots@Github, < https://github.com/Codeflix-Bots >.
-#
-# This file is part of < https://github.com/Codeflix-Bots/FileStore > project,
-# and is released under the MIT License.
-# Please see < https://github.com/Codeflix-Bots/FileStore/blob/master/LICENSE >
-#
-# All rights reserved.
