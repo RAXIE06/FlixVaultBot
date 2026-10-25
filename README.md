@@ -1,47 +1,87 @@
-━━━━━━━━━━━━━━━━━━━━
+<div align="center">
 
-<h2 align="center">
-    ──「 ғʟɪxᴠᴀᴜʟᴛ sᴇᴄᴜʀᴇ ᴅᴇʟɪᴠᴇʀʏ ʙᴏᴛ 」──
-</h2>
+# 🎬 FlixVault Secure Delivery Bot
+### *Automated Digital Asset & Movie Distribution System*
 
-<p align="center">
-  <img src="https://graph.org/file/8581e33195ed8183a3253.jpg">
-</p>
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
+[![Pyrogram](https://img.shields.io/badge/Pyrogram-Asyncio-orange.svg)](https://docs.pyrogram.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+</div>
 
-![Typing SVG](https://readme-typing-svg.herokuapp.com/?lines=FLIXVAULT+SECURE+DELIVERY+!;AUTOMATED+MOVIE+DISTRIBUTION+!;BUILT+FOR+SEAMLESS+USER+EXPERIENCE!)
-</p>
- 
-━━━━━━━━━━━━━━━━━
+---
 
+## 🚀 Overview
 
+**FlixVault Bot** is a high-performance, secure Telegram FileStore and digital asset delivery bot built with **Python (Pyrogram)** and **MongoDB**. It is natively integrated with the FlixVault web platform, providing an automated, zero-expiry, single-use token delivery system that sends files directly to users' personal Telegram DMs instantly after purchase verification.
 
-<details><summary><b>📌 ғᴇᴀᴛᴜʀᴇs:</b></summary>
+---
 
-<b>🚀 Key Features:</b>
+## 🛠️ Core Architecture & Workflow
 
-• <b>Auto Code Generator:</b> Send any movie file (Video/Document) to the bot as an admin, and it automatically generates a unique `botCode` (e.g., `FLX-MOV-XXXX`) for your website admin panel.  
-• <b>Token-Based Direct DM Delivery:</b> Users receive direct personal Telegram DM delivery using secure, zero-expiry, single-use tokens (`t.me/YourBot?start=TOKEN_XYZ`).  
-• <b>Channel Posting & Post Builder:</b> Create interactive posts with custom URL buttons and reaction counters using <code>/create_post</code> and <code>/send</code>.  
-• <b>Channel Management:</b> Add, remove, and diagnose authorized channels with <code>/add_channel</code>, <code>/remove_channel</code>, <code>/list_channels</code>, and <code>/diag_channels</code>.  
-• <b>Admin Controls:</b> Secure admin permission handling via `OWNER_ID` and `ADMINS` list.  
-• <b>Shared Database Integration:</b> Seamlessly synced with MongoDB collections (`users`, `files`, `delivery_tokens`, `channels`) for smooth website-to-bot communication.
+1. **Admin File Ingestion:** Admin sends any movie or document file directly to the bot. The bot automatically saves it to MongoDB and generates a unique, human-readable code (e.g., `FLX-MOV-A7X9`).
+2. **Website Integration:** The generated `botCode` is mapped to movies on the FlixVault website's admin panel.
+3. **Secure Purchase & Token Generation:** Upon successful payment verification on the web app, a unique secure token (`tok_...`) is generated and linked with the respective `botCode` in the shared database.
+4. **Direct DM Delivery:** When the user clicks the secure Telegram deep link (`t.me/YourBot?start=tok_...`), the bot validates the token (zero time-expiry, single-use rule), marks it as `used`, and delivers the file directly to the user's personal chat.
 
-<b>✨ Built strictly for clean, ad-free, and instant digital asset delivery!</b>
-</details>
+---
 
+## ✨ Key Features
 
-<details><summary><b> - ᴠᴀʀɪᴀʙʟᴇs :</b></summary>
-  
-## ᴠᴀʀɪᴀʙʟᴇs
-* `API_HASH` Your API Hash from my.telegram.org
-* `APP_ID` Your API ID from my.telegram.org
-* `TG_BOT_TOKEN` Your bot token from @BotFather
-* `OWNER_ID` Must enter Your Telegram Id
-* `DATABASE_URL` Your MongoDB connection string
-* `DATABASE_NAME` Your MongoDB database/session name
-* `ADMINS` Optional: A space-separated list of additional admin user IDs
-* `START_MESSAGE` Optional: Custom welcome message for the bot
-</details>
+* **🔑 Auto Code Generator:** Instant unique code generation when admins upload media files.
+* **📦 Secure Direct DM Delivery:** Safe, non-expiring single-use token system preventing link leakage.
+* **📢 Advanced Post Builder:** Create rich interactive channel posts with custom URL buttons and live reaction counters (`/create_post`, `/send`).
+* **🛡️ Channel Diagnostics:** Built-in admin tools to inspect, add, remove, and verify bot admin status across distribution channels (`/add_channel`, `/diag_channels`).
+* **⚡ Lean & Clean Codebase:** Stripped of unnecessary forced-subscriptions, ads, or shortlink bloat for maximum speed and reliability.
 
-## 𝐶𝑜𝑚𝑚𝑎𝑛𝑑𝑠
+---
+
+## ⚙️ Environment Variables (`config.py` / `.env`)
+
+Configure the following environment variables before running the bot:
+
+| Variable | Description |
+| :--- | :--- |
+| `TG_BOT_TOKEN` | Your Telegram Bot Token obtained from [@BotFather](https://t.me/BotFather) |
+| `APP_ID` | Your Telegram API ID from [my.telegram.org](https://my.telegram.org) |
+| `API_HASH` | Your Telegram API Hash from [my.telegram.org](https://my.telegram.org) |
+| `OWNER_ID` | Telegram User ID of the primary bot owner / administrator |
+| `DATABASE_URL` | MongoDB connection string (Shared with your web app) |
+| `DATABASE_NAME` | MongoDB database name |
+| `ADMINS` | Optional: Space-separated list of additional admin user IDs |
+| `START_MESSAGE` | Custom HTML welcome message for the bot |
+
+---
+
+## 🤖 Bot Commands
+
+### User & General Commands
+* `/start` — Start the bot or process secure asset delivery tokens.
+* `/cmds` — Display available command list.
+
+### Admin & Management Commands
+* `/create_post` — Launch the interactive post draft builder.
+* `/send` — Publish drafts to authorized channels.
+* `/add_channel` — Register a new distribution channel.
+* `/remove_channel` — Unlink a distribution channel.
+* `/list_channels` — View all registered channels.
+* `/diag_channels` — Check bot administrative privileges in all channels.
+
+---
+
+## 📦 Deployment Methods
+
+### Deploy on VPS / Linux Server
+
+```bash
+# Clone the repository
+git clone [https://github.com/YourUsername/FlixVault-Bot.git](https://github.com/YourUsername/FlixVault-Bot.git)
+cd FlixVault-Bot
+
+# Install dependencies
+pip3 install -U -r requirements.txt
+
+# Configure your credentials in config.py
+# Run the bot
+python3 main.py
