@@ -5,6 +5,8 @@ import motor, asyncio
 import motor.motor_asyncio
 import time
 import pymongo, os
+import random
+import string
 from config import DB_URI, DB_NAME
 import logging
 from datetime import datetime, timedelta
@@ -30,6 +32,10 @@ class Rohit:
         self.templates = self.database['templates']
         self.channel_admins = self.database['channel_admins']
         self.channel_settings = self.database['channel_settings']
+        
+        # --- FLIXVAULT INTEGRATION COLLECTIONS ---
+        self.files = self.database['files'] # FileStore files collection
+        self.delivery_tokens = self.database['delivery_tokens'] # Shared with website for instant purchase delivery
 
     # USER DATA
     async def present_user(self, user_id: int):
@@ -87,9 +93,6 @@ class Rohit:
             return result.get('reactions', {}).get(emoji, 0)
         return 0
 
-    # Scheduled posts
-
-
     # Templates
     async def add_template(self, owner: int, name: str, content: str):
         await self.templates.update_one({'owner': owner, 'name': name}, {'$set': {'content': content, 'updated_at': datetime.utcnow()}}, upsert=True)
@@ -129,9 +132,53 @@ class Rohit:
             return default
         return doc.get(key, default)
 
+    # --- FLIXVAULT BOT FILE & TOKEN METHODS ---
+    async def save_file_with_auto_code(self, file_id: str, file_name: str = ""):
+        """Automatically generates a unique botCode and saves file info."""
+        rand_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        bot_code = f"FLX-MOV-{rand_str}"
+        
+        doc = {
+            'file_id': file_id,
+            'file_name': file_name,
+            'bot_code': bot_code,
+            'created_at': datetime.utcnow()
+        }
+        await self.files.update_one({'bot_code': bot_code}, {'$set': doc}, upsert=True)
+        return bot_code
 
+    async def get_file_by_code(self, bot_code: str):
+        """Finds file reference using the unique botCode."""
+        return await self.files.find_one({'bot_code': bot_code})
 
-
+    async def verify_and_consume_token(self, token: str, telegram_user_id: str):
+        """
+        Verifies website delivery token (No time expiry, single-use only).
+        Marks status as 'used' once verified so it cannot be reused.
+        """
+        token_doc = await self.delivery_tokens.find_one({"token": token})
+        if not token_doc:
+            return {"success": False, "error": "❌ Invalid link. Please purchase from the website."}
+        
+        if token_doc.get("status") == "used":
+            return {"success": False, "error": "⚠️ This link has already been used. Each link works only once."}
+        
+        # Mark token as used permanently (No time-expiry check)
+        await self.delivery_tokens.update_one(
+            {"token": token},
+            {
+                "$set": {
+                    "status": "used", 
+                    "usedAt": datetime.utcnow(), 
+                    "telegramUserId": str(telegram_user_id)
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "bot_code": token_doc.get("botCode")
+        }
 
 
 db = Rohit(DB_URI, DB_NAME)
