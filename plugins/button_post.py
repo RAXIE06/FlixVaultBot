@@ -56,6 +56,7 @@ async def _attempt_send_preview(client, dest_chat_id, msg, reply_markup=None):
 def build_start_kb():
     kb = InlineKeyboardMarkup(
         [
+            [InlineKeyboardButton("🌐 Visit Website", url="https://flix-vault-self.vercel.app/")], # Apni website ka link yahan daal dein
             [InlineKeyboardButton("Create Post", callback_data="create_post")],
             [InlineKeyboardButton("About", callback_data="about"), InlineKeyboardButton("Help", callback_data="help")],
             [InlineKeyboardButton("Close", callback_data="close")]
