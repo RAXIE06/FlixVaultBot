@@ -133,15 +133,6 @@ async def send_draft_menu(client, chat_id: int, uid: int):
         await client.send_message(chat_id, "Draft saved. Use the buttons below to edit or post.", reply_markup=kb)
 
 
-@Client.on_message(filters.private & filters.command("start"))
-async def start_cmd(client, message):
-    mention = message.from_user.mention if message.from_user else "user"
-    try:
-        await message.reply_photo(photo=START_PIC, caption=START_MSG.format(mention=mention), reply_markup=build_start_kb())
-    except Exception:
-        await message.reply_text(START_MSG.format(mention=mention), reply_markup=build_start_kb())
-
-
 async def post_draft_to_target(client, uid, target_id, reply_chat_id):
     """Helper to post a draft to a target channel id and notify the requester."""
     if uid not in DRAFTS:
@@ -448,7 +439,7 @@ async def cb_handler(client, cb):
             target = await client.get_chat(ch.text.strip())
             ch_id = target.id
         except Exception:
-            await ch.reply_text("Could not find that channel. Make sure I am in the channel and provided the correct username or ID.")
+            await cb.message.reply_text("Could not find that channel. Make sure I am in the channel and provided the correct username or ID.")
             return
         try:
             member = await client.get_chat_member(ch_id, (await client.get_me()).id)
@@ -723,6 +714,7 @@ async def send_cmd(client, message):
     await message.reply_text("Choose channel to send to:", reply_markup=InlineKeyboardMarkup(rows))
     return
 
+
 # --- 1. ADMIN FILE UPLOAD HANDLER (Auto Code Generator) ---
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio | filters.photo))
 async def handle_admin_file_upload(client, message):
@@ -749,7 +741,7 @@ async def handle_admin_file_upload(client, message):
     )
 
 
-# --- 2. TOKEN START HANDLER (Website Purchase Delivery) ---
+# --- 2. TOKEN START HANDLER (Website Purchase Delivery & Normal Start) ---
 @Client.on_message(filters.private & filters.command("start"))
 async def start_cmd(client, message):
     text = message.text
